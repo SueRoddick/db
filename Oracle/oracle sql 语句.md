@@ -43,9 +43,13 @@ imp scts3/scts3 file=scts2016-07-31_qiu.dmp full=y
 第二种：直接导入导出
 导出
 exp lsreport/lsreport@129db file=E:\导出.dmp 
+
 ①完全导出 full=y 
+
 ②用户1和用户2的表导出 owner=(用户1,用户2)
+
 ③将表1和表2导出 tables=(table1,table2)
+
 ④将表1中字段1以“00” 开头的数据导出 tables=(table1) query=\"where 字段1 like '00%'\"
 
 导入
@@ -64,12 +68,19 @@ select to_char(sysdate,'yyyy-mm-dd hh24:mi:ss') as nowTime from dual;
 
 ##### 4、查询前N条记录
 ①查询前10条记录
+
 SELECT *　FROM torderdetail a WHERE ROWNUM <= 10
+
 ②查询10到20条（先排序后取数据）
+
 SELECT * FROM (SELECT a.*, ROWNUM rn FROM torderdetail a)　WHERE rn >= 10 AND rn <= 20
+
 ③对于分组后取最近的10条纪录，则是rownum无法实现的，这时只有row_number可以实现，row_number() over(partition by 分组字段 order by 排序字段)就能实现分组后编号，比如说要取近一个月的每天最后10个订单纪录
+
 SELECT * FROM (SELECT a.*, ROW_NUMBER () OVER (PARTITION BY TRUNC (order_date) ORDER BY order_date DESC) rn FROM torderdetail a)　WHERE rn <= 10
+
 ④输出当月的所有天数
+
 SELECT TRUNC (SYSDATE, 'MM') + ROWNUM - 1 FROM DUAL CONNECT BY ROWNUM <= TO_NUMBER (TO_CHAR (LAST_DAY (SYSDATE), 'dd'))
 
 ##### 5、删除重复数据，只留一条数据
@@ -79,45 +90,61 @@ and   rowid  not in (select min(rowid ) from bt_dbjh_tc group by planid having c
 
 ##### 6、oracle账户过期修改
 1、查看用户的proifle是哪个，一般是default：
+
 ①SELECT username,PROFILE FROM dba_users;
+
 ②查看指定概要文件（如default）的密码有效期设置： 
 SELECT * FROM dba_profiles s WHERE s.profile='DEFAULT' AND resource_name='PASSWORD_LIFE_TIME';
+
 ③修改为无限期；修改之后不需要重启动数据库，会立即生效。
 ALTER PROFILE DEFAULT LIMIT PASSWORD_LIFE_TIME UNLIMITED;
+
 ④ 修改后，还没有被提示ORA-28002警告的帐户不会再碰到同样的提示；  已经被提示的帐户必须再改一次密码
 alter user smsc identified by <原来的密码> ----不用换新密码
 
 ##### 7、oracle授权
 系统权限授权命令：grant connect, resource, dba to 用户名1 [,用户名2]...;
+
 系统权限传递：增加WITH ADMIN OPTION选项，则得到的权限可以传递。
+
  grant connect, resorce to user50 with admin option; //可以传递所获权限。
+ 
  系统权限回收：系统权限只能由DBA用户回收
+ 
   Revoke connect, resource from user50;
 
 实体权限分类：select, update, insert, alter, index, delete, all //all包括所有权限
+```
 user01:
 SQL> grant select, update, insert on product to user02;
 SQL> grant all on product to user02;
-
+```
 将表的操作权限授予全体用户：
+
 SQL> grant all on product to public; // public表示是所有的用户，这里的all权限不包括drop。
 
 实体权限传递(with grant option)：
+
 user01:
+
 SQL> grant select, update on product to user02 with grant option; // user02得到权限，并可以传递。
 
 实体权限回收：
+
 user01:
+
 SQL>Revoke select, update on product from user02; //传递的权限将全部丢失。
 
 ##### 8、从一个表的字段更新另一个表的字段
+```
 merge into  LS_FLOW_RECORD_SHIFT   
 using LS_FLOW_RECORD 
 on(  LS_FLOW_RECORD_SHIFT.Recordid=LS_FLOW_RECORD.id)
 when matched then
 update set LS_FLOW_RECORD_SHIFT.flowid=LS_FLOW_RECORD.flowid;
-
+```
 ##### 9 查看用户空间大小
+```
 ①select tablespace_name ,sum(bytes) / 1024 / 1024 as MB　from dba_data_files group by tablespace_name;
 
 ②select tablespace_name,file_name from dba_data_files;
@@ -131,44 +158,55 @@ from dba_free_space a,dba_data_files b
 where a.file_id=b.file_id
 group by b.tablespace_name,b.file_name,b.bytes
 order by b.tablespace_name;
-
+```
 ④各个实例所占空间
+```
 select *
   from (select owner || '.' || tablespace_name name, sum(b) g
-?          from (select owner,
-?                       t.segment_name,
-?                       t.partition_name,
-?                       round(bytes / 1024 / 1024 / 1024, 2) b,
-?                       tablespace_name
-?                  from dba_segments t)
-?         where owner not in
-?               ('SYS', 'OUTLN', 'SYSTEM', 'TSMSYS', 'DBSNMP', 'WMSYS')
-?         group by owner || '.' || tablespace_name)
+          from (select owner,
+                       t.segment_name,
+                       t.partition_name,
+                       round(bytes / 1024 / 1024 / 1024, 2) b,
+                       tablespace_name
+                 from dba_segments t)
+        where owner not in
+              ('SYS', 'OUTLN', 'SYSTEM', 'TSMSYS', 'DBSNMP', 'WMSYS')
+         group by owner || '.' || tablespace_name)
  order by name
-
+```
 ##### 10、oracle复制表数据，复制表结构 
 
 ①.不同用户之间的表数据复制 
 对于在一个数据库上的两个用户A和B，假如需要把A下表old的数据复制到B下的new，请使用权限足够的用户登入sqlplus：
+
 insert into B.new(select * from A.old);
+
 如果需要加条件限制，比如复制当天的A.old数据
+
 insert into B.new(select * from A.old where date=GMT); 
 
 蓝色斜线处为选择条件
 
 ②.同用户表之间的数据复制?
+
 用户B下有两个表：B.x和B.y，如果需要从表x转移数据到表y，使用用户B登陆sqlpus即可：
+
 insert into?目标表y select * from x where log_id>'3049' --?复制数据?
+
 注意：要示目标表y必须事先创建好
+
 如insert into bs_log2 select * from bs_log where log_id>'3049' 
 
 ③.B.x中个别字段转移到B.y的相同字段?
+
 --如果两个表结构一样
 insert into table_name_new select * from table_name_old 
+
 如果两个表结构不一样：
 insert into y(字段1,字段2) select?字段1,字段2 from x
 
 ④.只复制表结构 加入了一个永远不可能成立的条件1=2，则此时表示的是只复制表结构，但是不复制表内容???
+
 create table 用户名.表名 as select * from 用户名.表名 where 1=2
 如create table zdsy.bs_log2 as select * from zdsy.bs_log where 1=2
 
@@ -176,19 +214,25 @@ create table 用户名.表名 as select * from 用户名.表名 where 1=2
 create table test as select * from bs_log??--bs_log是被复制表
 
 ⑥将多个表数据插入一个表中
+
 insert into 目标表test(字段1。。。字段n) (select?字段1.。。。。字段n) from 表  union all select?字段1.....字段n from 表
 ?
 
-⑦、创建用户budget_zlgc，权限和budget相同,（A、只复制所有表结构
+⑦、创建用户budget_zlgc，权限和budget相同,
+（A、只复制所有表结构
+
 B、复制所有表所有信息）
+
 创建用户budget_zlgc，并导出budge用户数据
+```
 exp userid="\"sys/sys as sysdba"\" file='/backup/expdb/oa0824.dmp' log='/backup/expdb/oaex0825.log' owner=budget ignore=Y buffer=256000000
-?
+```
+```
 A、budget用户所有表，表结构和budget相同，（无数据）
 imp userid="\"sys/sys as sysdba"\" file='/backup/expdb/oa0824.dmp' log='/backup/expdb/oa0825.log' fromuser=budget touser=budget_zlgc ignore=Y buffer=256000000 rows=n
 B、budget用户所有表，表结构、数据和budget相同
 imp userid="\"sys/sys as sysdba"\" file='/backup/expdb/oa0824.dmp' log='/backup/expdb/oa0825.log' fromuser=budget touser=budget_zlgc ignore=Y
-
+```
 ##### 11、释放表删除数据空间
 truncate table  tablename  DROP STORAGE;
 
