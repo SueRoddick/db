@@ -297,6 +297,7 @@ WHERE l.object_id = o.object_id AND l.session_id = s.sid;
 
 创建表及分区
 
+```
 create table DT_ELECTRICITY_MINUTEDATA
 (
   rtuid     INTEGER,
@@ -309,22 +310,14 @@ create table DT_ELECTRICITY_MINUTEDATA
 PARTITION BY RANGE("date")
 
  (  
-     PARTITION elec_min_part201612 VALUES LESS THAN (20170101) , 
-     
+     PARTITION elec_min_part201612 VALUES LESS THAN (20170101) ,     
      PARTITION elec_min_part201701 VALUES LESS THAN (20170201) , 
-     
-     PARTITION elec_min_part201702 VALUES LESS THAN (20170301) , 
-     
-     PARTITION elec_min_part201703 VALUES LESS THAN (20170401) , 
-     
-     PARTITION elec_min_part201704 VALUES LESS THAN (20170501) , 
-     
-     PARTITION elec_min_part201705 VALUES LESS THAN (20170601) ,
-     
-     PARTITION elec_min_part201706 VALUES LESS THAN (20170701) ,  
-     
-     PARTITION elec_min_part201707 VALUES LESS THAN (20170801)  
-     
+     PARTITION elec_min_part201702 VALUES LESS THAN (20170301) ,      
+     PARTITION elec_min_part201703 VALUES LESS THAN (20170401) ,      
+     PARTITION elec_min_part201704 VALUES LESS THAN (20170501) ,      
+     PARTITION elec_min_part201705 VALUES LESS THAN (20170601) ,     
+     PARTITION elec_min_part201706 VALUES LESS THAN (20170701) ,       
+     PARTITION elec_min_part201707 VALUES LESS THAN (20170801)       
 ); 
 
  create index DT_ELEC_MINDATABACK_INDEX on DT_ELECTRICITY_MINUTEDATA (RTUID, MP_ID, "date", TIME)
@@ -339,7 +332,7 @@ PARTITION BY RANGE("date")
     minextents 1
     maxextents unlimited
   ) 
-  
+  ```
 --ALTER TABLE DT_ELECTRICITY_MINUTEDATA EXCHANGE PARTITION elec_min_part201602 WITH TABLE DT_ELECTRICITY_MINUTEDATA_BACK;--交换分区
 
 --alter table DT_ELECTRICITY_MIN add partition elec_minute_part201708 VALUES LESS THAN (20170901);--添加分区
