@@ -284,11 +284,15 @@ SQL>select sysdate from dual;
 SYSDATE
 
 2013-06-03 15:35:57
+
 //开始恢复数据 
+
 SQL> alter table test1 enable row movement;//在闪回前必须 启动行移动功能 否则会报错误：  ORA-08189: 因为未启用行移动功能, 不能闪回表
 
 表已更改。
+
 SQL> FLASHBACK TABLE test1 TO TIMESTAMP to_timestamp('2013-06-03 15:35:00','yyyy-mm-dd hh24:mi:ss');
+
 //注意：恢复时间点必须是在删除数据之前 这里是2013-06-03 15:35:57 之前就可以
 
 闪回完成。
@@ -298,19 +302,22 @@ SQL> select count(*) from test1;
 COUNT(*)
 
  57158
+ 
 数据已经恢复成功，57158行 跟未删除前是一样的，如果想看被删除了哪些行（在删除后闪回前）：
+
 SELECT * FROM test1 AS OF TIMESTAMP to_timestamp('2013-06-03 15:35:00','yyyy-mm-dd hh24:mi:ss')
 MINUS
 SELECT * FROM test1
 
 ②恢复被删除的表
+
 SQL> drop table test1;
 表已删除。
 
 SQL> flashback table test1 to before drop;
 闪回完成。
 
-##### 13、、 delete 删除数据恢复：（必须9i或10g以上版本支持，flashback无法恢复全文索引）
+##### 13、 delete 删除数据恢复：（必须9i或10g以上版本支持，flashback无法恢复全文索引）
 
 利用Oracle提供的闪回方法，如果在删除数据后还没做大量的操作（只要保证被删除数据的块没被覆写），就可以利用闪回方式直接找回删除的数据
 具体步骤为：
