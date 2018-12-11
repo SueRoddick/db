@@ -195,18 +195,25 @@ truncate table  tablename  DROP STORAGE;
  ##### 12、使用flashback（闪回）恢复误删除的数据 或 误删除的表 
 1、从回收站恢复时重命名表
 SQL> flashback table t2 to before drop rename to t4 ;
+
 2、删除回收站指定的表
 SQL> purge table t4;
+
 3、清空回收站
 SQL> purge recyclebin
+
 4、删除表时不经过回收站直接删除
 SQL> drop table t3 purge ;
+
 5、从回收站看删除的表
 select * from user_recyclebin 
 
 ①恢复表中误删除的记录
-  前提：1.表的结构未改动;如果在删除后表结构发生改动则不能使用闪回；
+  前提：
+  1.表的结构未改动;如果在删除后表结构发生改动则不能使用闪回；
+  
   2.用户必须有足够的权限
+  
 直接用个例子来说明更加直观：
   表：
 create table TEST1
@@ -255,6 +262,7 @@ SELECT * FROM test1
 ②恢复被删除的表
 SQL> drop table test1;
 表已删除。
+
 SQL> flashback table test1 to before drop;
 闪回完成。
 
@@ -274,16 +282,21 @@ SQL> flashback table test1 to before drop;
 ##### 14、ORACLE EBS操作某一个FORM界面，或者后台数据库操作某一个表时发现一直出于"假死"状态，可能是该表被某一用户锁定，导致其他用户无法继续操作
 复制代码 代码如下:
 --锁表查询SQL
+
 SELECT object_name, owner,machine, object_type,s.sid, s.serial#
 FROM gv$locked_object l, dba_objects o, gv$session s
 WHERE l.object_id = o.object_id AND l.session_id = s.sid;
+
 找到被锁定的表，解锁
+
 复制代码 代码如下:--释放SESSION SQL:
+
 --alter system kill session 'sid, serial#';
 
 ##### 15、Oracle表分区 
 
 创建表及分区
+
 create table DT_ELECTRICITY_MINUTEDATA
 (
   rtuid     INTEGER,
@@ -292,16 +305,26 @@ create table DT_ELECTRICITY_MINUTEDATA
   "date"   INTEGER,
   time    INTEGER
 ) 
+
 PARTITION BY RANGE("date")
+
  (  
-?     PARTITION elec_min_part201612 VALUES LESS THAN (20170101) , 
-?     PARTITION elec_min_part201701 VALUES LESS THAN (20170201) , 
-?     PARTITION elec_min_part201702 VALUES LESS THAN (20170301) , 
-?     PARTITION elec_min_part201703 VALUES LESS THAN (20170401) , 
-?     PARTITION elec_min_part201704 VALUES LESS THAN (20170501) , 
-?     PARTITION elec_min_part201705 VALUES LESS THAN (20170601) ,
-?     PARTITION elec_min_part201706 VALUES LESS THAN (20170701) ,  
-?     PARTITION elec_min_part201707 VALUES LESS THAN (20170801)  
+     PARTITION elec_min_part201612 VALUES LESS THAN (20170101) , 
+     
+     PARTITION elec_min_part201701 VALUES LESS THAN (20170201) , 
+     
+     PARTITION elec_min_part201702 VALUES LESS THAN (20170301) , 
+     
+     PARTITION elec_min_part201703 VALUES LESS THAN (20170401) , 
+     
+     PARTITION elec_min_part201704 VALUES LESS THAN (20170501) , 
+     
+     PARTITION elec_min_part201705 VALUES LESS THAN (20170601) ,
+     
+     PARTITION elec_min_part201706 VALUES LESS THAN (20170701) ,  
+     
+     PARTITION elec_min_part201707 VALUES LESS THAN (20170801)  
+     
 ); 
 
  create index DT_ELEC_MINDATABACK_INDEX on DT_ELECTRICITY_MINUTEDATA (RTUID, MP_ID, "date", TIME)
@@ -311,11 +334,12 @@ PARTITION BY RANGE("date")
   maxtrans 255
   storage
   (
-?    initial 64K
-?    next 1M
-?    minextents 1
-?    maxextents unlimited
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
   ) 
+  
 --ALTER TABLE DT_ELECTRICITY_MINUTEDATA EXCHANGE PARTITION elec_min_part201602 WITH TABLE DT_ELECTRICITY_MINUTEDATA_BACK;--交换分区
 
 --alter table DT_ELECTRICITY_MIN add partition elec_minute_part201708 VALUES LESS THAN (20170901);--添加分区
@@ -327,13 +351,17 @@ PARTITION BY RANGE("date")
 with table DT_ELECTRICITY_MINUTEDATA without validation*/
 
 --收集表的统计信息
+
 --exec dbms_stats.gather_table_stats('ENERGY', 'DT_ELECTRICITY_MINUTEDATA', cascade => true);
+
 --检查重定义的合理性
+
 --exec dbms_redefinition.can_redef_table('ENERGY', 'DT_ELECTRICITY_MINUTEDATA');
 
 SELECT * FROM dba_part_tables where owner='ENERGY';--查看用户那些表有分区
 
 SELECT * FROM dba_tab_partitions WHERE table_name = 'DT_ELECTRICITY_MINUTEDATA' and partition_name='ELEC_MIN_PART201707';--查找表的分区
+
 SELECT * FROM dba_ind_partitions WHERE index_name = 'DT_ELECTRICITY_MINUTEDATA';--查找索引
 
  --INSERT INTO DT_ELECTRICITY_MINUTEDATA  SELECT * FROM  DT_ELECTRICITY_MINUTEDATA_BACK  
