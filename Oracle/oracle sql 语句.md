@@ -119,7 +119,9 @@ update set LS_FLOW_RECORD_SHIFT.flowid=LS_FLOW_RECORD.flowid;
 
 ##### 9 查看用户空间大小
 ①select tablespace_name ,sum(bytes) / 1024 / 1024 as MB　from dba_data_files group by tablespace_name;
+
 ②select tablespace_name,file_name from dba_data_files;
+
 ③select b.file_name 物理文件名,
 b.tablespace_name 表空间,
 b.bytes/1024/1024 大小M,
