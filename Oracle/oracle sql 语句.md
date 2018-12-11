@@ -151,7 +151,9 @@ select *
 insert into B.new(select * from A.old);
 如果需要加条件限制，比如复制当天的A.old数据
 insert into B.new(select * from A.old where date=GMT); 
+
 蓝色斜线处为选择条件
+
 ②.同用户表之间的数据复制?
 用户B下有两个表：B.x和B.y，如果需要从表x转移数据到表y，使用用户B登陆sqlpus即可：
 insert into?目标表y select * from x where log_id>'3049' --?复制数据?
@@ -163,15 +165,18 @@ insert into?目标表y select * from x where log_id>'3049' --?复制数据?
 insert into table_name_new select * from table_name_old 
 如果两个表结构不一样：
 insert into y(字段1,字段2) select?字段1,字段2 from x
+
 ④.只复制表结构 加入了一个永远不可能成立的条件1=2，则此时表示的是只复制表结构，但是不复制表内容???
 create table 用户名.表名 as select * from 用户名.表名 where 1=2
 如create table zdsy.bs_log2 as select * from zdsy.bs_log where 1=2
+
 ⑤完全复制表(包括创建表和复制表中的记录)
 create table test as select * from bs_log??--bs_log是被复制表
 
 ⑥将多个表数据插入一个表中
 insert into 目标表test(字段1。。。字段n) (select?字段1.。。。。字段n) from 表  union all select?字段1.....字段n from 表
 ?
+
 ⑦、创建用户budget_zlgc，权限和budget相同,（A、只复制所有表结构
 B、复制所有表所有信息）
 创建用户budget_zlgc，并导出budge用户数据
