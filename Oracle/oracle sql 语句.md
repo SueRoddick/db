@@ -372,16 +372,23 @@ SELECT * FROM dba_ind_partitions WHERE index_name = 'DT_ELECTRICITY_MINUTEDATA';
 Oracle archive log归档文件地址D:\app\Administrator\flash_recovery_area\YULANGDB\ARCHIVELOG
 
 select * from V$RECOVERY_FILE_DEST; //查询归档日志空间大小及路径
+
 show parameter recover; //显示归档文件路径
+
 select * from v$flash_recovery_area_usage; --查看空间占用率
+
 alter system set db_recovery_file_dest_size=20G;--增大归档日志空间
 
 
 进入rman进行删除归档，相关命令如下：
 rman target sys/lsreport@yulangdb--登录rman
+
 RMAN>list archive log --查看archivelog 列表
+
 RMAN>show parameter log_archive_dest;--查看archivelog日志位置
+
 RMAN>delete expired archivelog all; //删除所有归档日志
+
 RMAN>DELETE ARCHIVELOG ALL COMPLETED BEFORE ‘SYSDATE-7’; //保留7天的归档日志
 
 
@@ -389,16 +396,23 @@ RMAN>DELETE ARCHIVELOG ALL COMPLETED BEFORE ‘SYSDATE-7’; //保留7天的归�
 SQL> alter system set log_archive_start=false scope=spfile; #禁用自归档
 
 SQL> shutdown immediate; //强制关闭数据库 
+
 SQL> startup mount; //重启数据库到mount模式 
+
 SQL> alter database noarchivelog; //修改为非归档模式 
+
 SQL> alter database open; //打数据文件 
+
 SQL> archive log list; //再次查看前归档模式
 
 ##### 17 查询数据库，表名，视图，列名等
-
+```
 select instance_name from v$instance;
+
 select name,dbid from v$database;
+
 select value from v$parameter where name='db_domain';
+
 SELECT * FROM user_views;
 
 select col.column_name 
@@ -409,14 +423,17 @@ and col.table_name = 'LS_FLOW_TYPE';
 
 
 SELECT USER_TAB_COLS.TABLE_NAME   as 表名,
-?       USER_TAB_COLS.COLUMN_NAME  as 列名,
-?       USER_TAB_COLS.DATA_TYPE    as 数据类型,
-?       USER_TAB_COLS.DATA_LENGTH  as 长度,
-?       USER_TAB_COLS.NULLABLE     as 是否为空,
-?       USER_TAB_COLS.COLUMN_ID    as 列序号,
-?       user_col_comments.comments as 备注
+       USER_TAB_COLS.COLUMN_NAME  as 列名,
+       USER_TAB_COLS.DATA_TYPE    as 数据类型,
+       USER_TAB_COLS.DATA_LENGTH  as 长度,
+       USER_TAB_COLS.NULLABLE     as 是否为空,
+       USER_TAB_COLS.COLUMN_ID    as 列序号,
+       user_col_comments.comments as 备注
+       
   FROM USER_TAB_COLS
+  
  inner join user_col_comments
-?    on user_col_comments.TABLE_NAME = USER_TAB_COLS.TABLE_NAME
+    on user_col_comments.TABLE_NAME = USER_TAB_COLS.TABLE_NAME
    and user_col_comments.COLUMN_NAME = USER_TAB_COLS.COLUMN_NAME
    where USER_TAB_COLS.TABLE_NAME='TEST'
+```
