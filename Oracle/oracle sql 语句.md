@@ -115,6 +115,9 @@ alter user smsc identified by <原来的密码> ----不用换新密码
 
 实体权限分类：select, update, insert, alter, index, delete, all //all包括所有权限
 ```
+授予用户dba权限：
+grant connect,resource,dba to lsreport  ---一般不用，一般用户都不要授予dba权限
+
 user01:
 SQL> grant select, update, insert on product to user02;
 SQL> grant all on product to user02;
