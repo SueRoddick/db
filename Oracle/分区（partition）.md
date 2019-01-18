@@ -179,6 +179,10 @@ SUBPARTITION BY HASH(hash_column_key) SUBPARTITIONS 2
 
 #### 四、  有关分区表的维护操作
 
+##### 0、在已存在且有数据的表上创建分区
+
+  参考：https://www.cnblogs.com/25288-hf/p/6691027.html
+
 ##### 1.添加分区
 
 以下代码给SALES表添加了一个P3分区
@@ -373,7 +377,7 @@ ALTER INDEX gidx_range_exampel_id drop partition part_01 ;
 
 **注意：对于表分区的各种操作，一定要注意更新索引**
 
-#### 三  相关查询
+#### 五  相关查询
 
 ##### 1.跨分区查询
 
